@@ -18,7 +18,7 @@ export default function Home() {
 
     setHistory((prevHistory) => new Map(prevHistory).set("user:" + Date.now(), text));
 
-    const res = await fetch(`http://api.localhost/chat/sendMsg?message=${encodeURIComponent(text)}`, {
+    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}`, {
       headers: { "Content-Type": "application/json" },
     });
 
