@@ -16,9 +16,13 @@ export default function Home() {
     if (text === "")
       return;
 
+    const urlHistory = Array.from(history.entries()).map(([role, content]) => [role.split(":")[0], content]);
+
+    console.log(JSON.stringify(urlHistory));
+
     setHistory((prevHistory) => new Map(prevHistory).set("user:" + Date.now(), text));
 
-    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}`, {
+    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}&history=${encodeURIComponent(JSON.stringify(urlHistory))}`, {
       headers: { "Content-Type": "application/json" },
     });
 
