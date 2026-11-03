@@ -49,7 +49,7 @@ export default function Home() {
         </div>
 
         <input value={message} onChange={(e) => setMessage(e.target.value)} type="text" placeholder="Message qwen3:4b"></input>
-        <button onClick={() => sendMessage(message)}>Send</button>
+        <button onClick={() => {sendMessage(message); setMessage("")}}>Send</button>
       </div>
     </>
   );
