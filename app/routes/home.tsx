@@ -3,8 +3,8 @@ import type { Route } from "./+types/home";
 
 export function meta({ }: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Chatty" },
+    { name: "description", content: "Internal Chat Platform for company communication" },
   ];
 }
 
@@ -12,17 +12,16 @@ export default function Home() {
   const [history, setHistory] = React.useState<Map<string, string>>(new Map());
   const [message, setMessage] = React.useState("");
 
+  /*
+    Function to send a message to the backend API and update the chat history.
+  */
   async function sendMessage(text: string) {
     if (text === "")
       return;
 
-    const urlHistory = Array.from(history.entries()).map(([role, content]) => [role.split(":")[0], content]);
+    setHistory((prevHistory) => new Map(prevHistory).set("you:" + Date.now(), text));
 
-    console.log(JSON.stringify(urlHistory));
-
-    setHistory((prevHistory) => new Map(prevHistory).set("user:" + Date.now(), text));
-
-    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}&history=${encodeURIComponent(JSON.stringify(urlHistory))}`, {
+    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}`, {
       headers: { "Content-Type": "application/json" },
     });
 
@@ -32,7 +31,7 @@ export default function Home() {
 
     const data = await res.json();
 
-    setHistory((prevHistory) => new Map(prevHistory).set("assistant:" + Date.now(), data.ollamaData.message.content));
+    setHistory((prevHistory) => new Map(prevHistory).set("partner:" + Date.now(), data.ollamaData.message.content));
   }
 
   return (
@@ -49,7 +48,7 @@ export default function Home() {
         </div>
 
         <input value={message} onChange={(e) => setMessage(e.target.value)} type="text" placeholder="Message qwen3:4b"></input>
-        <button onClick={() => {sendMessage(message); setMessage("")}}>Send</button>
+        <button onClick={() => { sendMessage(message); setMessage("") }}>Send</button>
       </div>
     </>
   );
