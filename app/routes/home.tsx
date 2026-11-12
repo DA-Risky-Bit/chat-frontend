@@ -41,6 +41,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [rows, setRows] = React.useState(1);
   const [err, setErr] = React.useState("");
 
+  const emilImg = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fhundemagazin.info%2Fwp-content%2Fuploads%2F2019%2F09%2Fhundemagazin.info-beitrag-welche-hunderassen-werden-am-aeltesten-1024x683.jpg&f=1&nofb=1&ipt=64b561b4d3c7a44c0915d7571d6aa466857bba4cc512465f9c025f5283bd28b4&ipo=images"
+
   useEffect(() => {
     if (loaderData !== null) {
       console.log("effect: " + Array.from(loaderData))
@@ -112,7 +114,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <div className="chat-container">
           <div className="chat-header">
             <div className="header-profile">
-              <img className="pfp" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y" alt="Avatar" />
+              <img className="pfp" src={emilImg} alt="Avatar" />
               <div className="header-name-container">
                 <h1 className="header-name">Emil Winter</h1>
                 <div className="header-info">
