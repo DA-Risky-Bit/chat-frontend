@@ -11,15 +11,9 @@ export default function Message({ role, content, timestamp }: { role: string; co
                     <p className="message-timestamp">{new Date(timestamp).toLocaleTimeString()}</p>
                 </div>
                 <div className="message-body">
-                    {content}
+                    <p>{content}</p>
                 </div>
             </div>
         </div>
     );
 }
-
-/*
-<div>
-    <strong>{role.split(":")[0]}:{new Date(parseInt(role.split(":")[1])).toLocaleTimeString()}</strong> {content}
-</div>
-*/
