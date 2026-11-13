@@ -42,7 +42,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [err, setErr] = React.useState("");
 
   const emilImg = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.oNUPp4deWHQkkxGXMvHtAQHaHa%3Fr%3D0%26pid%3DApi&f=1&ipt=824a44205fc8850c9de7708f79bdc1e046903ec82e85a4d7b66bc338bfd29953&ipo=images";
-  
+
   useEffect(() => {
     if (loaderData !== null) {
       console.log("effect: " + Array.from(loaderData))
@@ -90,22 +90,16 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     async function reset() {
       await fetch(`http://api.localhost/api/chat/history`, {
         method: "DELETE"
-      })
+      }).then(res => res.ok)
 
       window.location.reload();
     }
 
     function handleKeyInput(e: React.KeyboardEvent) {
-      if (e.key === "Enter" && e.shiftKey) {
+      if (e.key === "Enter") {
         sendMessage(message);
         e.preventDefault();
         setRows(1);
-      } else if (e.key === "Enter" && rows < 3) {
-        setRows(rows + 1);
-      } else if (e.key === "Enter") {
-        e.preventDefault();
-      } else if (e.key === "Backspace" && rows > 1) {
-        setRows(rows - 1);
       }
     }
 
@@ -133,9 +127,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           </div>
 
           <div className="chat-input">
-            <p>Shift + Enter to send</p>
+            <p>Enter to send</p>
             <p className="error">{err}</p>
-            <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message qwen3:4b" rows={rows}></textarea>
+            <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
             <div className="chat-input-actions">
               <span>
                 <svg width="20px" height="20px" viewBox="0 0 24 24" fill="var(--text-muted)" xmlns="http://www.w3.org/2000/svg">
