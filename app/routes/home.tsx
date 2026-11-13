@@ -41,8 +41,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [rows, setRows] = React.useState(1);
   const [err, setErr] = React.useState("");
 
-  const emilImg = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fhundemagazin.info%2Fwp-content%2Fuploads%2F2019%2F09%2Fhundemagazin.info-beitrag-welche-hunderassen-werden-am-aeltesten-1024x683.jpg&f=1&nofb=1&ipt=64b561b4d3c7a44c0915d7571d6aa466857bba4cc512465f9c025f5283bd28b4&ipo=images"
-
+  const emilImg = "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse2.mm.bing.net%2Fth%2Fid%2FOIP.oNUPp4deWHQkkxGXMvHtAQHaHa%3Fr%3D0%26pid%3DApi&f=1&ipt=824a44205fc8850c9de7708f79bdc1e046903ec82e85a4d7b66bc338bfd29953&ipo=images";
+  
   useEffect(() => {
     if (loaderData !== null) {
       console.log("effect: " + Array.from(loaderData))
@@ -88,7 +88,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     }
 
     async function reset() {
-      fetch(`http://api.localhost/api/chat/history`, {
+      await fetch(`http://api.localhost/api/chat/history`, {
         method: "DELETE"
       })
 
