@@ -102,6 +102,56 @@
   gap: 1em;
 }
 
+.none {
+  display: none;
+}
+
+.typing-indicator {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  color: var(--primary-color);
+  animation: typing-indicator 1s infinite linear alternate;
+  animation-delay: 0.5s;
+}
+.typing-indicator::before, .typing-indicator::after {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  top: 0;
+}
+.typing-indicator::before {
+  left: -15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  color: var(--primary-color);
+  animation: typing-indicator 1s infinite alternate;
+  animation-delay: 0s;
+}
+.typing-indicator::after {
+  left: 15px;
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  color: var(--primary-color);
+  animation: typing-indicator 1s infinite alternate;
+  animation-delay: 1s;
+}
+
+@keyframes typing-indicator {
+  0% {
+    background-color: var(--primary-color);
+  }
+  50%, 100% {
+    background-color: rgba(152, 128, 255, 0.2);
+  }
+}
+
 .pfp {
   width: 3em;
   height: 3em;
