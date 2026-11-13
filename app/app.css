@@ -102,6 +102,13 @@
   gap: 1em;
 }
 
+.typing-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 15px;
+}
+
 .none {
   display: none;
 }
@@ -112,43 +119,49 @@
   height: 10px;
   border-radius: 5px;
   background-color: var(--primary-color);
+  margin-left: 15px;
   color: var(--primary-color);
   animation: typing-indicator 1s infinite linear alternate;
   animation-delay: 0.5s;
 }
-.typing-indicator::before, .typing-indicator::after {
+
+.typing-indicator::before,
+.typing-indicator::after {
   content: "";
   display: inline-block;
   position: absolute;
-  top: 0;
 }
+
 .typing-indicator::before {
   left: -15px;
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  background-color: var(--primary-color);
-  color: var(--primary-color);
+  background-color: var(--primary);
+  color: var(--primary);
   animation: typing-indicator 1s infinite alternate;
   animation-delay: 0s;
 }
+
 .typing-indicator::after {
   left: 15px;
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  background-color: var(--primary-color);
-  color: var(--primary-color);
+  background-color: var(--primary);
+  color: var(--primary);
   animation: typing-indicator 1s infinite alternate;
   animation-delay: 1s;
 }
 
 @keyframes typing-indicator {
   0% {
-    background-color: var(--primary-color);
+    background-color: var(--primary);
   }
-  50%, 100% {
-    background-color: rgba(152, 128, 255, 0.2);
+
+  50%,
+  100% {
+    background-color: rgba(128, 128, 128, 0.2);
   }
 }
 
@@ -183,7 +196,7 @@
   color: var(--text-muted);
 }
 
-.chat-container { 
+.chat-container {
   display: flex;
   flex-direction: column;
   width: 100%;
@@ -213,7 +226,7 @@ textarea {
   outline: none;
   background-color: transparent;
   height: fit-content;
-  resize:both;
+  resize: both;
   color: var(--text);
   width: 100%;
 }

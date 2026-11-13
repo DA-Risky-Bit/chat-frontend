@@ -137,10 +137,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
 
         <div className="chat-input">
-          <div className={typing ? 'typing-indicator' : 'none'}>
-            <div className={typing ? 'typing-indicator' : 'none'}>
-              <div className={typing ? 'typing-indicator' : 'none'}>Emil is typing</div>
-            </div>
+          <div className="typing-container">
+            <p className={typing ? '' : 'none'}>Emil is typing</p>
+            <div className={typing ? 'typing-indicator' : 'none'}></div>
           </div>
           <p className="error">{err}</p>
           <textarea autoFocus value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
