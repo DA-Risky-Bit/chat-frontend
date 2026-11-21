@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import type { Route } from "./+types/home";
 import Message from "../components/message";
+import DM from "../components/DM_Account"
 import "../app.css"
 
 export function meta({ }: Route.MetaArgs) {
@@ -11,7 +12,7 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
-  var loaderData = { "history": new Map<string, string>(), "dms": {}};
+  var loaderData = { "history": new Map<string, string>(), "dms": {} };
 
   const historyRes = await fetch("http://api.localhost/api/chat/history", {
     method: "GET",
@@ -50,6 +51,7 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
 
 export default function Home({ loaderData }: Route.ComponentProps) {
   const [history, setHistory] = React.useState<Map<string, string>>(new Map());
+  const [dms, setDMs] = React.useState({})
   const [message, setMessage] = React.useState("");
   const [sending, setSending] = React.useState(false);
   const [rows, setRows] = React.useState(1);
@@ -64,6 +66,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     if (loaderData !== null) {
       console.log(loaderData)
       setHistory(loaderData.history);
+      setDMs(loaderData.dms);
     }
   }, [loaderData]);
 
@@ -169,9 +172,9 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="chat-listing">
             <h1 className="accent-header">Kürzlich verwendet</h1>
             <div>
-              <p>thomas berger</p>
-              <p>sabine gruber</p>
-              <p>maria huber</p>
+              {dms && typeof dms === "object" && Object.values(dms).map((element: { name: string; status: string }) => (
+                <DM key={element.name} name={element.name} status={element.status} />
+              ))}
             </div>
           </div>
         </div>
