@@ -11,27 +11,41 @@ export function meta({ }: Route.MetaArgs) {
 }
 
 export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
-  return fetch("http://api.localhost/api/chat/history", {
+  var loaderData = { "history": new Map<string, string>(), "dms": {}};
+
+  const historyRes = await fetch("http://api.localhost/api/chat/history", {
     method: "GET",
     headers: { "Content-Type": "application/json" },
-  }).then(
-    res => {
-      if (res.ok) {
-        return res.json();
-      } else {
-        return new Map<string, string>();
-      }
-    })
-    .then(
-      data => {
-        console.log(data)
+  }).catch((e) => {
+    // do nothing as history is already empty
+  });
 
-        return data;
+  const dmRes = await fetch("http://api.localhost/api/chat/dms", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).catch((e) => {
+    // do nothing as dms are already empty
+  });
+
+  if (historyRes !== undefined) {
+    if (historyRes.ok) {
+      const data = await historyRes.json();
+
+      for (const message of data) {
+        loaderData.history.set(message[0], message[1]);
       }
-    )
-    .catch(
-      () => new Map<string, string>()
-    );
+    }
+  }
+
+  if (dmRes !== undefined) {
+    if (dmRes.ok) {
+      const data = await dmRes.json();
+
+      loaderData.dms = data;
+    }
+  }
+
+  return loaderData;
 }
 
 export default function Home({ loaderData }: Route.ComponentProps) {
@@ -48,12 +62,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     if (loaderData !== null) {
-      console.log("effect: " + Array.from(loaderData))
-      const newHistory = new Map<string, string>();
-      for (const message of loaderData) {
-        newHistory.set(message[0], message[1]);
-      }
-      setHistory(newHistory);
+      console.log(loaderData)
+      setHistory(loaderData.history);
     }
   }, [loaderData]);
 
@@ -192,7 +202,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <div className={typing ? 'typing-indicator' : 'none'}></div>
             </div>
             <p className="error">{err}</p>
-            <textarea autoFocus value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
+            <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
             <div className="chat-input-actions">
               <span>
                 <svg width="20px" height="20px" viewBox="0 0 24 24" fill="var(--text-muted)" xmlns="http://www.w3.org/2000/svg">
