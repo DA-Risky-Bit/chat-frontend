@@ -192,7 +192,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               <div className={typing ? 'typing-indicator' : 'none'}></div>
             </div>
             <p className="error">{err}</p>
-            <textarea autoFocus value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
+            <textarea  value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
             <div className="chat-input-actions">
               <span>
                 <svg width="20px" height="20px" viewBox="0 0 24 24" fill="var(--text-muted)" xmlns="http://www.w3.org/2000/svg">
