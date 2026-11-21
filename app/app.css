@@ -34,14 +34,73 @@
   --accent-text: var(--accent-text-light);
 }
 
+.chat-listing {
+  display: flex;
+  flex-direction: column;
+  margin: 5em 1em;
+}
+
+.accent-header {
+  color: var(--accent-text);
+  font-size: 1em;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: row;
+  background-color: var(--tertiary);
+  height: 2em;
+  gap: 1vw;
+  padding: 0.2em 0.5em;
+  margin: 0.5em 1em;
+  border-radius: 2em;
+  color: var(--accent-text);
+  font-size: 1em;
+}
+
+.company-select {
+  display: flex;
+  flex-direction: row;
+  font-size: 1.5em;
+  height: 2em;
+  margin: 1em;
+  color: var(--small-text);
+}
+
+.svg-text {
+  display: flex;
+  flex-direction: row;
+  gap: 1vw;
+  height: 1.5em;
+  margin: 0.5em 1.5em;
+  color: var(--accent-text);
+}
+
+.chat-wrapper {
+  display: flex;
+  flex-direction: row;
+  background-color: var(--tertiary);
+  width: 100%;
+  height: 100%;
+}
+
+.chat-list {
+  background-color: var(--bg1);
+  color: var(--small-text);
+  width: 25vw;
+  height: 100%;
+  margin-left: 5vw;
+}
+
 .chat-header {
   z-index: 1000;
   position: fixed;
-  width: 100%;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   padding: 1em;
+  right: 0;
+  width: 76vw;
   border-bottom: 1px solid var(--border);
 }
 
@@ -205,7 +264,7 @@
 }
 
 .chat-input {
-  position: fixed;
+  position: absolute;
   z-index: 100;
   display: flex;
   flex-direction: column;
@@ -214,11 +273,10 @@
   border-radius: 0.5em;
   border: 1px solid var(--border);
   color: var(--text-muted);
+  width: 74vw;
   bottom: 0;
-  right: 0;
-  left: 0;
   padding: 0.5em 1em;
-  margin: 1em;
+  margin: 1vw;
 }
 
 textarea {
