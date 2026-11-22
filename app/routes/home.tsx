@@ -15,14 +15,14 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
   var loaderData = { "history": new Map<string, string>(), "dms": {} };
 
   const historyRes = await fetch("http://api.localhost/api/chat/history", {
-    method: "GET",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
   }).catch((e) => {
     // do nothing as history is already empty
   });
 
   const dmRes = await fetch("http://api.localhost/api/chat/dms", {
-    method: "GET",
+    method: "POST",
     headers: { "Content-Type": "application/json" },
   }).catch((e) => {
     // do nothing as dms are already empty
@@ -57,6 +57,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [rows, setRows] = React.useState(1);
   const [err, setErr] = React.useState("");
   const [typing, setTyping] = React.useState(false);
+  const [active, setActive] = React.useState(0);
+  const [chat, setChat] = React.useState({"id": "", "name": "", "desc": "", "status": ""});
 
   const messageList = React.useRef<HTMLDivElement | null>(null);
 
@@ -74,6 +76,24 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     const list = messageList.current;
     if (list) list.scrollTop = list.scrollHeight;
   }, [history]);
+
+  useEffect(() => {
+    console.log(active);
+
+    async function loadChat() {
+      await fetch(`http://api.localhost/api/chat/dms/${active}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }).then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setChat(data);
+        });
+    }
+
+    void loadChat();
+
+  }, [active])
 
   /*
     Function to send a message to the backend API and update the chat history.
@@ -172,8 +192,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="chat-listing">
             <h1 className="accent-header">Kürzlich verwendet</h1>
             <div>
-              {dms && typeof dms === "object" && Object.values(dms).map((element: { name: string; status: string }) => (
-                <DM key={element.name} name={element.name} status={element.status} />
+              {dms && typeof dms === "object" && Object.values(dms).map((element: { id: number; name: string; status: string }) => (
+                <DM key={element.id} id={element.id} name={element.name} status={element.status} setActive={setActive} />
               ))}
             </div>
           </div>
@@ -183,10 +203,10 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <div className="header-profile">
               <img className="pfp" src={emilImg} alt="Avatar" />
               <div className="header-name-container">
-                <h1 className="header-name">Emil Winter</h1>
+                <h1 className="header-name">{chat.name}</h1>
                 <div className="header-info">
-                  <p className="header-department">Software Developer</p>
-                  <p className="header-status">online</p>
+                  <p className="header-department">{chat.desc}</p>
+                  <p className="header-status">{chat.status}</p>
                 </div>
               </div>
             </div>

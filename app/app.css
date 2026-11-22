@@ -46,6 +46,7 @@
 
 .dm-container:hover {
   background-color: var(--tertiary);
+  cursor: pointer;
 }
 
 .dm-container:active {
