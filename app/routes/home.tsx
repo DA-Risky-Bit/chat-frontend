@@ -16,7 +16,13 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
 
   const historyRes = await fetch("http://api.localhost/api/chat/history", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      'Accept': 'application/json',
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      "id": 0
+    })
   }).catch((e) => {
     // do nothing as history is already empty
   });
@@ -53,12 +59,12 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   const [history, setHistory] = React.useState<Map<string, string>>(new Map());
   const [dms, setDMs] = React.useState({})
   const [message, setMessage] = React.useState("");
-  const [sending, setSending] = React.useState(false);
+  const [sending, setSending] = React.useState<boolean[]>([]);
   const [rows, setRows] = React.useState(1);
   const [err, setErr] = React.useState("");
-  const [typing, setTyping] = React.useState(false);
+  const [typing, setTyping] = React.useState<boolean[]>([]);
   const [active, setActive] = React.useState(0);
-  const [chat, setChat] = React.useState({"id": "", "name": "", "desc": "", "status": ""});
+  const [chat, setChat] = React.useState({ "id": "", "name": "", "desc": "", "status": "" });
 
   const messageList = React.useRef<HTMLDivElement | null>(null);
 
@@ -78,8 +84,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }, [history]);
 
   useEffect(() => {
-    console.log(active);
-
     async function loadChat() {
       await fetch(`http://api.localhost/api/chat/dms/${active}`, {
         method: "POST",
@@ -92,6 +96,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     }
 
     void loadChat();
+    loadHistory();
 
   }, [active])
 
@@ -99,22 +104,37 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     Function to send a message to the backend API and update the chat history.
   */
   async function sendMessage(text: string) {
-    if (text === "" || sending) {
+    if (text === "" || sending[active]) {
       setErr("please await last message");
       return;
     }
 
     setMessage("");
-    setSending(true);
-    setTyping(true);
+    setSending((prev) => {
+      const next = [...prev];
+      next[active] = true;
+      return next;
+    });
+    setTyping((prev) => {
+      const next = [...prev];
+      next[active] = true;
+      return next;
+    });
 
-    console.log(Array.from(history.entries()))
+    const resId = active;
 
     setHistory((prevHistory) => new Map(prevHistory).set("you:" + Date.now(), text));
 
-    const res = await fetch(`http://api.localhost/api/chat/sendMsg?message=${encodeURIComponent(text)}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch(`http://api.localhost/api/chat/sendMsg`, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "id": resId,
+        "message": text
+      })
     });
 
     if (!res.ok) {
@@ -123,16 +143,58 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
     const data = await res.json();
 
-    setHistory((prevHistory) => new Map(prevHistory).set("emil:" + Date.now(), data.ollamaData.message.content));
+    if (resId === active) {
+      setHistory((prevHistory) => new Map(prevHistory).set(`${chat.name}:` + Date.now(), data.ollamaData.message.content));
+    }
 
-    setSending(false);
-    setTyping(false);
-    setErr("")
+    setSending((prev) => {
+      const next = [...prev];
+      next[active] = false;
+      return next;
+    });
+    setTyping((prev) => {
+      const next = [...prev];
+      next[active] = false;
+      return next;
+    });
+    setErr("");
+  }
+
+  async function loadHistory() {
+    const historyRes = await fetch("http://api.localhost/api/chat/history", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "id": active
+      })
+    });
+
+    if (historyRes !== undefined) {
+      if (historyRes.ok) {
+        const data = await historyRes.json();
+
+        setHistory(new Map())
+
+        for (const message of data) {
+          setHistory((prevHistory) => new Map(prevHistory).set(message[0], message[1]));
+        }
+      }
+    }
   }
 
   async function reset() {
     await fetch(`http://api.localhost/api/chat/history`, {
-      method: "DELETE"
+      method: "DELETE",
+      headers: {
+        'Accept': 'application/json',
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "id": chat.id
+      })
     }).then(res => res.ok)
 
     window.location.reload();
@@ -193,7 +255,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <h1 className="accent-header">Kürzlich verwendet</h1>
             <div>
               {dms && typeof dms === "object" && Object.values(dms).map((element: { id: number; name: string; status: string }) => (
-                <DM key={element.id} id={element.id} name={element.name} status={element.status} setActive={setActive} />
+                <DM key={element.id} id={element.id} name={element.name} status={element.status} setActive={setActive} active={active} />
               ))}
             </div>
           </div>
@@ -221,8 +283,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
           <div className="chat-input">
             <div className="typing-container">
-              <p className={typing ? '' : 'none'}>Emil is typing</p>
-              <div className={typing ? 'typing-indicator' : 'none'}></div>
+              <p className={typing[active] ? '' : 'none'}>{chat.name} is typing</p>
+              <div className={typing[active] ? 'typing-indicator' : 'none'}></div>
             </div>
             <p className="error">{err}</p>
             <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>

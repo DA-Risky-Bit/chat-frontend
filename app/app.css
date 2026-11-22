@@ -42,16 +42,26 @@
   height: 4em;
   padding: 0.5em;
   color: var(--text-muted-inv);
+  border-radius: 0.5em;
 }
 
 .dm-container:hover {
   background-color: var(--tertiary);
+  color: var(--text-muted-inv);
   cursor: pointer;
 }
 
-.dm-container:active {
+.dm-container:hover .accent-header {
+  color: var(--accent-text);
+}
+
+.dm-active {
   color: var(--text-muted);
   background-color: var(--bg);
+}
+
+.dm-active .accent-header {
+  color: var(--tertiary);
 }
 
 .chat-listing {
