@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
+import React, { act, useEffect } from "react";
 import type { Route } from "./+types/home";
 import Message from "../components/message";
 import DM from "../components/DM_Account"
 import "../app.css"
 import { API } from "../lib/config";
+import { api } from "~/api/clients";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -15,7 +16,7 @@ export function meta({ }: Route.MetaArgs) {
 export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
   var loaderData = { "history": new Map<string, string>(), "dms": {} };
 
-  const historyRes = await fetch(`${API}/api/chat/history`, {
+  const historyRes = await api(`/api/chat/history`, {
     method: "POST",
     headers: {
       'Accept': 'application/json',
@@ -28,7 +29,7 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
     // do nothing as history is already empty
   });
 
-  const dmRes = await fetch(`${API}/api/chat/dms`, {
+  const dmRes = await api(`/api/chat/dms`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   }).catch((e) => {
@@ -56,15 +57,32 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
   return loaderData;
 }
 
+function reducer(state: { value: boolean[] }, action: { type: string, active: number }) {
+  if (action.type === 'invert_state') {
+    console.log(action.active)
+
+    var newState = [...state.value];
+    newState[action.active] = !state.value[action.active];
+    return {
+      value: newState
+    }
+  }
+  throw Error('Unknown action.');
+}
+
 export default function Home({ loaderData }: Route.ComponentProps) {
   const [history, setHistory] = React.useState<Map<string, string>>(new Map());
   const [dms, setDMs] = React.useState({})
   const [message, setMessage] = React.useState("");
-  const [sending, setSending] = React.useState<boolean[]>([]);
   const [rows, setRows] = React.useState(1);
   const [err, setErr] = React.useState("");
-  const [typing, setTyping] = React.useState<boolean[]>([]);
   const [active, setActive] = React.useState(0);
+  const activeRef = React.useRef(active);
+  React.useLayoutEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+  const [typing, typingDispatch] = React.useReducer(reducer, { value: [false, false, false] });
+  const [sending, sendingDispatch] = React.useReducer(reducer, { value: [false, false, false] });
   const [chat, setChat] = React.useState({ "id": "", "name": "", "desc": "", "status": "" });
 
   const messageList = React.useRef<HTMLDivElement | null>(null);
@@ -85,8 +103,16 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }, [history]);
 
   useEffect(() => {
+    console.log(sending)
+  }, [sending]);
+
+  useEffect(() => {
+    console.log(typing)
+  }, [typing]);
+
+  useEffect(() => {
     async function loadChat() {
-      await fetch(`${API}/api/chat/dms/${active}`, {
+      await api(`/api/chat/dms/${active}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       }).then((res) => res.json())
@@ -105,28 +131,20 @@ export default function Home({ loaderData }: Route.ComponentProps) {
     Function to send a message to the backend API and update the chat history.
   */
   async function sendMessage(text: string) {
-    if (text === "" || sending[active]) {
+    if (text === "" || sending.value[active]) {
       setErr("please await last message");
       return;
     }
 
-    setMessage("");
-    setSending((prev) => {
-      const next = [...prev];
-      next[active] = true;
-      return next;
-    });
-    setTyping((prev) => {
-      const next = [...prev];
-      next[active] = true;
-      return next;
-    });
-
     const resId = active;
+
+    setMessage("");
+    sendingDispatch({ type: 'invert_state', active: resId })
+    typingDispatch({ type: 'invert_state', active: resId })
 
     setHistory((prevHistory) => new Map(prevHistory).set("you:" + Date.now(), text));
 
-    const res = await fetch(`${API}/api/chat/sendMsg`, {
+    const res = await api(`/api/chat/sendMsg`, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
@@ -142,34 +160,27 @@ export default function Home({ loaderData }: Route.ComponentProps) {
       throw new Response("Failed to fetch", { status: res.status });
     }
 
-    const data = await res.json();
+    console.log("ACTIVE SEND: " + active)
+    await loadHistory();
 
-    if (resId === active) {
-      setHistory((prevHistory) => new Map(prevHistory).set(`${chat.name}:` + Date.now(), data.ollamaData.message.content));
-    }
-
-    setSending((prev) => {
-      const next = [...prev];
-      next[active] = false;
-      return next;
-    });
-    setTyping((prev) => {
-      const next = [...prev];
-      next[active] = false;
-      return next;
-    });
+    sendingDispatch({ type: 'invert_state', active: resId })
+    typingDispatch({ type: 'invert_state', active: resId })
     setErr("");
   }
 
   async function loadHistory() {
-    const historyRes = await fetch(`${API}/api/chat/history`, {
+     const historyId = activeRef.current;
+     console.log("ACTIVE HISTORY: " + historyId)
+     console.log("CHAT HISTORY: " + chat)
+
+    const historyRes = await api(`/api/chat/history`, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        "id": active
+          "id": historyId
       })
     });
 
@@ -187,7 +198,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   async function reset() {
-    await fetch(`${API}/api/chat/history`, {
+    await api(`/api/chat/history`, {
       method: "DELETE",
       headers: {
         'Accept': 'application/json',
@@ -284,8 +295,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
           <div className="chat-input">
             <div className="typing-container">
-              <p className={typing[active] ? '' : 'none'}>{chat.name} is typing</p>
-              <div className={typing[active] ? 'typing-indicator' : 'none'}></div>
+              <p className={typing.value[active] ? '' : 'none'}>{chat.name} is typing</p>
+              <div className={typing.value[active] ? 'typing-indicator' : 'none'}></div>
             </div>
             <p className="error">{err}</p>
             <textarea value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={(e) => handleKeyInput(e)} placeholder="Message Emil" rows={rows}></textarea>
