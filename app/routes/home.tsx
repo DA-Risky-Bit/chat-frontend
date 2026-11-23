@@ -3,6 +3,7 @@ import type { Route } from "./+types/home";
 import Message from "../components/message";
 import DM from "../components/DM_Account"
 import "../app.css"
+import { API } from "../lib/config";
 
 export function meta({ }: Route.MetaArgs) {
   return [
@@ -14,7 +15,7 @@ export function meta({ }: Route.MetaArgs) {
 export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
   var loaderData = { "history": new Map<string, string>(), "dms": {} };
 
-  const historyRes = await fetch("http://api.localhost/api/chat/history", {
+  const historyRes = await fetch(`${API}/api/chat/history`, {
     method: "POST",
     headers: {
       'Accept': 'application/json',
@@ -27,7 +28,7 @@ export async function clientLoader({ params, }: Route.ClientLoaderArgs) {
     // do nothing as history is already empty
   });
 
-  const dmRes = await fetch("http://api.localhost/api/chat/dms", {
+  const dmRes = await fetch(`${API}/api/chat/dms`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
   }).catch((e) => {
@@ -85,7 +86,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   useEffect(() => {
     async function loadChat() {
-      await fetch(`http://api.localhost/api/chat/dms/${active}`, {
+      await fetch(`${API}/api/chat/dms/${active}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       }).then((res) => res.json())
@@ -125,7 +126,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
     setHistory((prevHistory) => new Map(prevHistory).set("you:" + Date.now(), text));
 
-    const res = await fetch(`http://api.localhost/api/chat/sendMsg`, {
+    const res = await fetch(`${API}/api/chat/sendMsg`, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
@@ -161,7 +162,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   async function loadHistory() {
-    const historyRes = await fetch("http://api.localhost/api/chat/history", {
+    const historyRes = await fetch(`${API}/api/chat/history`, {
       method: "POST",
       headers: {
         'Accept': 'application/json',
@@ -186,7 +187,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
   }
 
   async function reset() {
-    await fetch(`http://api.localhost/api/chat/history`, {
+    await fetch(`${API}/api/chat/history`, {
       method: "DELETE",
       headers: {
         'Accept': 'application/json',
